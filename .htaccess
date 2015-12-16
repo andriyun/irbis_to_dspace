@@ -1,0 +1,4 @@
+AuthType Basic
+AuthName "For Hklib"
+AuthUserFile E:\htdocs\dspace-exim\password
+Require valid-user 
