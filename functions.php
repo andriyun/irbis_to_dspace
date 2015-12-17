@@ -35,20 +35,20 @@ class IrbisExport {
     function init($record) {
         $fields = array();
         foreach ($record as $key => $field) {
-            list($part1, $part2) = explode('.', $key);
-            if ($part1 == 'FIELD' && is_array($field)) {
+            $parts = explode('.', $key);
+            if ($parts[0] == 'FIELD' && is_array($field)) {
                 $item_arr = array();
                 foreach ($field as $itemkey => $item) {
-                    list($itempart1, $itempart2) = explode('.', $itemkey);
-                    if ($itempart1 == 'SUBFIELD') {
-                        $item_arr[$itempart2] = $item;
+                    $subparts = explode('.', $itemkey);
+                    if (!empty($subparts[0]) && $subparts[0] == 'SUBFIELD') {
+                        $item_arr[$subparts[1]] = $item;
                     } elseif (is_array($item)) {
-                        $fields[$part2 . '_' . $itemkey] = $this->parse_arr($item);
+                        $fields[$parts[1] . '_' . $itemkey] = $this->parse_arr($item);
                     }
                 }
-                $fields[$part2] = $item_arr;
+                $fields[$parts[1]] = $item_arr;
             } else {
-                $fields[$part2] = $field;
+                $fields[$parts[0]] = $field;
             }
         }
         return $fields;
@@ -319,9 +319,11 @@ function xml2array($contents, $get_attributes = 1, $priority = 'tag') {
         }
 
         //See tag status and do the needed.
-        if ($type == "open") {//The starting of the tag '<tag>'
+        if ($type == "open") {
+            //The starting of the tag '<tag>'
             $parent[$level - 1] = &$current;
-            if (!is_array($current) or (!in_array($tag, array_keys($current)))) { //Insert New tag
+            if (!is_array($current) or (!in_array($tag, array_keys($current)))) {
+                //Insert New tag
                 $current[$tag] = $result;
                 if ($attributes_data) {
                     $current[$tag . '_attr'] = $attributes_data;
@@ -332,7 +334,8 @@ function xml2array($contents, $get_attributes = 1, $priority = 'tag') {
 
             } else {
                 //There was another element with the same tag name
-                if (isset($current[$tag][0])) {//If there is a 0th element it is already an array
+                if (is_array($current[$tag]) && isset($current[$tag][0])) {
+                    //If there is a 0th element it is already an array
                     $current[$tag][$repeated_tag_index[$tag . '_' . $level]] = $result;
                     $repeated_tag_index[$tag . '_' . $level]++;
                 } else {
