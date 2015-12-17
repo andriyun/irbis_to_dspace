@@ -1,48 +1,46 @@
 <?php
 if (isset($_POST['submit'])) {
 //echo '<pre>';print_r($_FILES);echo '</pre>';exit;
-  if ($_FILES['xmldata']['error']) {
-    $error = 'Error code:' . $_FILES['xmldata']['error'];
-  }
-  if ($error == '' && $_FILES['xmldata']['type'] != 'text/xml') {
-    $error = 'Невірний формат файлу';
-  }
-  $srcFolder = 'src/' . date('Y.m.d_H-i-s', strtotime('now'));
-  if (!is_dir($srcFolder)) {
-    mkdir($srcFolder);
-    chmod($srcFolder, 0775);
-  }
-  if ($error == '') {
-    include 'functions.php';
-    $data = file_get_contents($_FILES['xmldata']['tmp_name']);
-    $data_arr = xml2array($data);
-    $fields = array();
-    ob_start();
-    if (isset($data_arr['RECORDS']['record']['0'])) {
-      $records = $data_arr['RECORDS']['record'];
+    if ($_FILES['xmldata']['error']) {
+        $error = 'Error code:' . $_FILES['xmldata']['error'];
     }
-    else {
-      $records = $data_arr['RECORDS'];
+    if ($error == '' && $_FILES['xmldata']['type'] != 'text/xml') {
+        $error = 'Невірний формат файлу';
     }
-    foreach ($records as $key => $field) {
-      $item = new IrbisExport($field, $srcFolder);
-      //echo '<pre>';print_r($item->getRecord());echo '</pre>';
-      //$item->delSrc($key+1);
-      //echo $item->getBibOpys().'<br/><br/>';
-      if (!$item->createSrc($key + 1)) {
-        echo 'Помилка створення файлів для запису ' . $item->getRecordName();
-      }
-      unset($item);
+    $srcFolder = 'src/' . date('Y.m.d_H-i-s', strtotime('now'));
+    if (!is_dir($srcFolder)) {
+        mkdir($srcFolder);
+        chmod($srcFolder, 0775);
     }
-    $buffer = ob_get_contents();
-    ob_end_clean();
-    if ($buffer) {
-      $error = 'Помилки під час роботи:<br/><div style="background:#CCDD48;">' . $buffer . '</div>';
+    if ($error == '') {
+        include 'functions.php';
+        $data = file_get_contents($_FILES['xmldata']['tmp_name']);
+        $data_arr = xml2array($data);
+        $fields = array();
+        ob_start();
+        if (isset($data_arr['RECORDS']['record']['0'])) {
+            $records = $data_arr['RECORDS']['record'];
+        } else {
+            $records = $data_arr['RECORDS'];
+        }
+        foreach ($records as $key => $field) {
+            $item = new IrbisExport($field, $srcFolder);
+            //echo '<pre>';print_r($item->getRecord());echo '</pre>';
+            //$item->delSrc($key+1);
+            //echo $item->getBibOpys().'<br/><br/>';
+            if (!$item->createSrc($key + 1)) {
+                echo 'Помилка створення файлів для запису ' . $item->getRecordName();
+            }
+            unset($item);
+        }
+        $buffer = ob_get_contents();
+        ob_end_clean();
+        if ($buffer) {
+            $error = 'Помилки під час роботи:<br/><div style="background:#CCDD48;">' . $buffer . '</div>';
+        } else {
+            $message = '<b>Матеріали для імпорту згенеровано!</b><br/> Щоб провести імпорт скопіюйте файли з папки ' . $_SERVER['DOCUMENT_ROOT'] . '/dspace-exim/' . $srcFolder . ' в папку імпорту на сервері Dspace C:/Distr/DspaceImport/importsrc';
+        }
     }
-    else {
-      $message = '<b>Матеріали для імпорту згенеровано!</b><br/> Щоб провести імпорт скопіюйте файли з папки ' . $_SERVER['DOCUMENT_ROOT'] . '/dspace-exim/' . $srcFolder . ' в папку імпорту на сервері Dspace C:/Distr/DspaceImport/importsrc';
-    }
-  }
 }
 ?>
 
