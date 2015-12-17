@@ -4,7 +4,7 @@ if (isset($_POST['submit'])) {
     if ($_FILES['xmldata']['error']) {
         $error = 'Error code:' . $_FILES['xmldata']['error'];
     }
-    if ($error == '' && $_FILES['xmldata']['type'] != 'text/xml') {
+    if (empty($error) && $_FILES['xmldata']['type'] != 'text/xml') {
         $error = 'Невірний формат файлу';
     }
     $srcFolder = 'src/' . date('Y.m.d_H-i-s', strtotime('now'));
@@ -12,7 +12,7 @@ if (isset($_POST['submit'])) {
         mkdir($srcFolder);
         chmod($srcFolder, 0775);
     }
-    if ($error == '') {
+    if (empty($error)) {
         include 'functions.php';
         $data = file_get_contents($_FILES['xmldata']['tmp_name']);
         $data_arr = xml2array($data);
@@ -64,13 +64,13 @@ if (isset($_POST['submit'])) {
   </div>
   <div class="wraper">
     <div class="content">
-      <?php if ($error != '') { ?>
+      <?php if (!empty($error)) { ?>
         <div style="color:red">
           <?php print $error; ?>
         </div>
         <a href="https://docs.google.com/a/scbali.com/spreadsheet/viewform?formkey=dG1nLUlFc1lyUmhDR2FOZEVad05Mamc6MQ" target="_blank">Повідомити про помилку</a>
       <?php }
-      if ($message != '') { ?>
+      if (!empty($message)) { ?>
         <div>
           <?php print $message; ?>
         </div>
